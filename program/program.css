@@ -1,0 +1,136 @@
+/* ============================================================
+   HALAMAN PROGRAM — TEMA SD CERIA
+============================================================ */
+
+.hero-sd-stats {
+  display: inline-flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.hero-stat {
+  background: rgba(255,255,255,.2);
+  border: 1.5px solid rgba(255,255,255,.4);
+  backdrop-filter: blur(8px);
+  border-radius: 20px;
+  padding: 0.7rem 1.2rem;
+  min-width: 100px;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 0.15rem;
+  transition: transform 0.2s;
+}
+.hero-stat:hover { transform: translateY(-4px); }
+.hero-stat-icon { font-size: 1.25rem; }
+.hero-stat-num { font-size: 1.55rem; font-weight: 900; line-height: 1; }
+.hero-stat-label {
+  font-size: 0.66rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  opacity: 0.92;
+}
+
+/* LIST PROGRAM */
+.program-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.program-card {
+  background: #fff;
+  border-radius: 22px;
+  padding: 1.4rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  box-shadow: 0 8px 24px rgba(15,23,42,.06);
+  border: 3px solid #fff;
+  border-left: 8px solid var(--status-color, #a78bfa);
+  transition: transform 0.25s, box-shadow 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+.program-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 36px rgba(15,23,42,.12);
+}
+.program-card::after {
+  content: "";
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: var(--status-color, #a78bfa);
+  opacity: 0.06;
+}
+
+.program-card-body { flex: 1; min-width: 0; }
+
+.program-card-header {
+  display: flex; align-items: center;
+  gap: 0.65rem; margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+.program-card-header h3 {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--sd-ink);
+  letter-spacing: -0.01em;
+}
+
+.program-desc {
+  font-size: 0.88rem;
+  color: var(--sd-muted);
+  line-height: 1.55;
+  margin-bottom: 0.6rem;
+  font-weight: 500;
+}
+.program-meta {
+  font-size: 0.8rem;
+  color: var(--sd-muted);
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--line-soft);
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+}
+
+.program-card-actions {
+  display: flex; gap: 0.4rem;
+  flex-shrink: 0;
+}
+.program-card-actions .btn {
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+/* Status badge */
+.status-badge {
+  display: inline-block;
+  padding: 0.28rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #fff;
+}
+.status-rencana { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
+.status-berjalan { background: linear-gradient(135deg, #4facfe, #2563eb); }
+.status-selesai { background: linear-gradient(135deg, #34d399, #059669); }
+
+/* Warna border kiri sesuai status */
+.program-card:has(.status-rencana)  { --status-color: #f59e0b; }
+.program-card:has(.status-berjalan) { --status-color: #2563eb; }
+.program-card:has(.status-selesai)  { --status-color: #059669; }
+
+@media (max-width: 640px) {
+  .hero-stat { min-width: 82px; padding: 0.55rem 0.9rem; }
+  .hero-stat-num { font-size: 1.25rem; }
+  .program-card { flex-direction: column; padding: 1.1rem; }
+  .program-card-actions { width: 100%; }
+  .program-card-actions .btn { flex: 1; }
+  .program-card-header h3 { font-size: 0.95rem; }
+}

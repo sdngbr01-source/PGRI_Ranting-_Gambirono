@@ -1,0 +1,305 @@
+// ============================================
+// STATE
+// ============================================
+let allData = [];
+let currentFilter = '';
+
+const tbody       = document.getElementById('tbodyKas');
+const tfoot       = document.getElementById('tfootKas');
+const statSaldo   = document.getElementById('statSaldo');
+const statDebet   = document.getElementById('statDebet');
+const statKredit  = document.getElementById('statKredit');
+const tableSubtitle = document.getElementById('tableSubtitle');
+const addBtn      = document.getElementById('addBtn');
+const filterBulan = document.getElementById('filterBulan');
+const drawer      = document.getElementById('drawer');
+const drawerOverlay = document.getElementById('drawerOverlay');
+
+// ============================================
+// INIT
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+  loadData();
+  setupKeuanganEvents();
+});
+
+function setupKeuanganEvents() {
+  addBtn.addEventListener('click', () => openDrawer('add'));
+  document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+  document.getElementById('drawerCancel').addEventListener('click', closeDrawer);
+  drawerOverlay.addEventListener('click', closeDrawer);
+  document.getElementById('formTransaksi').addEventListener('submit', handleSubmit);
+  document.getElementById('refreshBtn').addEventListener('click', loadData);
+
+  filterBulan.addEventListener('change', e => {
+    currentFilter = e.target.value;
+    renderAll();
+  });
+
+  document.getElementById('inputJumlah').addEventListener('input', e => {
+    const val = Number(e.target.value) || 0;
+    document.getElementById('jumlahPreview').textContent = formatRupiah(val);
+  });
+
+  document.querySelectorAll('input[name="jenis"]').forEach(r => {
+    r.addEventListener('change', updateJumlahLabel);
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeDrawer();
+  });
+}
+
+function updateJumlahLabel() {
+  const jenis = document.querySelector('input[name="jenis"]:checked').value;
+  document.getElementById('labelJumlah').textContent =
+    jenis === 'debet' ? 'Jumlah Debet (Rp)' : 'Jumlah Kredit (Rp)';
+}
+
+// ============================================
+// LOAD
+// ============================================
+async function loadData() {
+  tbody.innerHTML = `<tr><td colspan="7" class="empty-state-sd"><div class="spinner"></div><div>Memuat...</div></td></tr>`;
+  try {
+    const res = await fetch(`${API_URL}?action=getTransaksi`, { redirect: 'follow' });
+    const result = await res.json();
+    if (result.status !== 'success') throw new Error(result.message);
+    allData = result.data || [];
+    buildMonthFilter();
+    renderAll();
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="7" class="empty-state-sd" style="color:#b91c1c">⚠️ ${escapeHtml(err.message)}</td></tr>`;
+    tfoot.classList.add('hidden');
+  }
+}
+
+function buildMonthFilter() {
+  const months = new Set();
+  allData.forEach(d => {
+    if (d.tanggal && d.tanggal.length >= 7) months.add(d.tanggal.substring(0, 7));
+  });
+  const sorted = Array.from(months).sort().reverse();
+  const currentVal = filterBulan.value || currentFilter;
+
+  filterBulan.innerHTML = '<option value="">Semua Bulan</option>';
+  sorted.forEach(m => {
+    const [y, mo] = m.split('-');
+    const label = new Date(y, Number(mo) - 1).toLocaleDateString('id-ID', {
+      month: 'long', year: 'numeric'
+    });
+    const opt = document.createElement('option');
+    opt.value = m;
+    opt.textContent = label;
+    filterBulan.appendChild(opt);
+  });
+  filterBulan.value = currentVal;
+  currentFilter = currentVal;
+}
+
+function getFilteredData() {
+  let data = [...allData];
+  if (currentFilter) data = data.filter(d => d.tanggal.startsWith(currentFilter));
+  data.sort((a, b) => {
+    if (a.tanggal !== b.tanggal) return a.tanggal.localeCompare(b.tanggal);
+    return String(a.id).localeCompare(String(b.id));
+  });
+  return data;
+}
+
+// ============================================
+// RENDER
+// ============================================
+function renderAll() {
+  const data = getFilteredData();
+  renderTable(data);
+  renderStats(data);
+  updateSubtitle();
+
+  if (addBtn) addBtn.classList.toggle('hidden', !isAdmin);
+  document.querySelectorAll('.admin-only').forEach(el => {
+    el.classList.toggle('hidden', !isAdmin);
+  });
+}
+
+function updateSubtitle() {
+  if (currentFilter) {
+    const [y, mo] = currentFilter.split('-');
+    const label = new Date(y, Number(mo) - 1).toLocaleDateString('id-ID', {
+      month: 'long', year: 'numeric'
+    });
+    tableSubtitle.textContent = `Menampilkan bulan ${label}`;
+  } else {
+    tableSubtitle.textContent = isAdmin
+      ? 'Mode admin · bisa menambah, mengedit, menghapus'
+      : 'Menampilkan semua transaksi';
+  }
+}
+
+function renderTable(data) {
+  if (data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" class="empty-state-sd">📭 Belum ada transaksi${currentFilter ? ' di bulan ini' : ''}.</td></tr>`;
+    tfoot.classList.add('hidden');
+    return;
+  }
+
+  let saldo = 0, totalDebet = 0, totalKredit = 0;
+
+  tbody.innerHTML = data.map((t, i) => {
+    const debet  = Number(t.debet)  || 0;
+    const kredit = Number(t.kredit) || 0;
+    saldo += debet - kredit;
+    totalDebet  += debet;
+    totalKredit += kredit;
+
+    const aksi = isAdmin
+      ? `<td class="admin-only text-center">
+           <div class="aksi-group">
+             <button class="btn btn-edit" onclick="editTransaksi('${escapeAttr(t.id)}')">✏️ Edit</button>
+             <button class="btn btn-hapus" onclick="hapusTransaksi('${escapeAttr(t.id)}')">🗑️ Hapus</button>
+           </div>
+         </td>`
+      : `<td class="admin-only hidden"></td>`;
+
+    return `
+      <tr>
+        <td class="col-no">${i + 1}</td>
+        <td class="col-tgl">${formatTanggal(t.tanggal)}</td>
+        <td>${escapeHtml(t.uraian)}</td>
+        <td class="text-right ${debet > 0 ? 'amount-income' : 'amount-null'}">${debet > 0 ? formatRupiah(debet) : '—'}</td>
+        <td class="text-right ${kredit > 0 ? 'amount-expense' : 'amount-null'}">${kredit > 0 ? formatRupiah(kredit) : '—'}</td>
+        <td class="text-right saldo ${saldo < 0 ? 'negative' : ''}">${formatRupiah(saldo)}</td>
+        ${aksi}
+      </tr>`;
+  }).join('');
+
+  tfoot.classList.remove('hidden');
+  document.getElementById('totalDebetFooter').textContent  = formatRupiah(totalDebet);
+  document.getElementById('totalKreditFooter').textContent = formatRupiah(totalKredit);
+  document.getElementById('saldoAkhirFooter').textContent  = formatRupiah(saldo);
+}
+
+function renderStats(data) {
+  let debet = 0, kredit = 0;
+  data.forEach(t => {
+    debet  += Number(t.debet)  || 0;
+    kredit += Number(t.kredit) || 0;
+  });
+  const saldo = debet - kredit;
+  statDebet.textContent  = formatRupiah(debet);
+  statKredit.textContent = formatRupiah(kredit);
+  statSaldo.textContent  = formatRupiah(saldo);
+  statSaldo.style.color  = saldo < 0 ? '#dc2626' : '';
+}
+
+// ============================================
+// DRAWER
+// ============================================
+function openDrawer(mode, data = null) {
+  const title  = document.getElementById('drawerTitle');
+  const inputId = document.getElementById('inputId');
+
+  document.getElementById('formTransaksi').reset();
+  document.getElementById('inputTanggal').value = new Date().toISOString().split('T')[0];
+  document.getElementById('jumlahPreview').textContent = 'Rp 0';
+
+  if (mode === 'edit' && data) {
+    title.textContent = 'Edit Transaksi';
+    inputId.value = data.id;
+    document.getElementById('inputTanggal').value = data.tanggal;
+    document.getElementById('inputUraian').value  = data.uraian;
+    if (Number(data.debet) > 0) {
+      document.querySelector('input[name="jenis"][value="debet"]').checked = true;
+      document.getElementById('inputJumlah').value = data.debet;
+    } else {
+      document.querySelector('input[name="jenis"][value="kredit"]').checked = true;
+      document.getElementById('inputJumlah').value = data.kredit;
+    }
+    document.getElementById('jumlahPreview').textContent = formatRupiah(data.debet || data.kredit);
+    document.getElementById('submitBtn').textContent = 'Update';
+  } else {
+    title.textContent = 'Tambah Transaksi';
+    inputId.value = '';
+    document.getElementById('submitBtn').textContent = 'Simpan';
+  }
+
+  updateJumlahLabel();
+  drawer.classList.add('open');
+  drawerOverlay.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDrawer() {
+  drawer.classList.remove('open');
+  drawerOverlay.classList.add('hidden');
+  document.body.style.overflow = '';
+}
+
+// ============================================
+// SUBMIT
+// ============================================
+async function handleSubmit(e) {
+  e.preventDefault();
+  const id = document.getElementById('inputId').value;
+  const jenis = document.querySelector('input[name="jenis"]:checked').value;
+  const jumlah = Number(document.getElementById('inputJumlah').value);
+
+  const payload = {
+    action: id ? 'updateTransaksi' : 'addTransaksi',
+    token:  token,
+    id:     id || undefined,
+    tanggal: document.getElementById('inputTanggal').value,
+    uraian:  document.getElementById('inputUraian').value,
+    debet:   jenis === 'debet'  ? jumlah : 0,
+    kredit:  jenis === 'kredit' ? jumlah : 0
+  };
+
+  const btn  = document.getElementById('submitBtn');
+  const orig = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Menyimpan...';
+
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST', redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+    if (result.status === 'success') {
+      closeDrawer();
+      await loadData();
+    } else {
+      alert('Gagal: ' + result.message);
+    }
+  } catch (err) {
+    alert('Error: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = orig;
+  }
+}
+
+function editTransaksi(id) {
+  const data = allData.find(t => t.id === id);
+  if (data) openDrawer('edit', data);
+}
+
+async function hapusTransaksi(id) {
+  if (!confirm('Yakin ingin menghapus transaksi ini?')) return;
+  try {
+    const res = await fetch(API_URL, {
+      method: 'POST', redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'deleteTransaksi', token, id })
+    });
+    const result = await res.json();
+    if (result.status === 'success') await loadData();
+    else alert('Gagal: ' + result.message);
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
+}
+
+window.editTransaksi  = editTransaksi;
+window.hapusTransaksi = hapusTransaksi;

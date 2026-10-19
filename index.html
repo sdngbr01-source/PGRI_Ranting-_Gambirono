@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard · PGRI Ranting Gambirono</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="page-dashboard">
+
+  <header class="header">
+    <div class="header-inner">
+      <a href="index.html" class="brand">
+        <div class="brand-logo"><img src="logo.png" alt="Logo PGRI"></div>
+        <div class="brand-text-wrap">
+          <span class="brand-title">PGRI Ranting</span>
+          <span class="brand-subtitle">Gambirono</span>
+        </div>
+      </a>
+      <div class="header-actions">
+        <span id="adminBadge" class="admin-badge hidden"><span class="dot"></span> Admin</span>
+        <button id="loginBtn" class="btn btn-outline" type="button">Login Admin</button>
+        <button id="logoutBtn" class="btn btn-outline hidden" type="button">Logout</button>
+      </div>
+    </div>
+    <nav class="main-nav">
+      <div class="nav-inner">
+        <a href="index.html" class="nav-link active">🏠 Dashboard</a>
+        <a href="pengurus/index.html" class="nav-link">👥 Susunan Pengurus</a>
+        <a href="program/index.html" class="nav-link">📋 Program Kerja</a>
+        <a href="keuangan/index.html" class="nav-link">💰 Laporan Keuangan</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero-sd">
+    <div class="hero-shapes" aria-hidden="true">
+      <span class="shape s1"></span><span class="shape s2"></span>
+      <span class="shape s3"></span><span class="shape s4"></span>
+      <span class="shape s5"></span>
+    </div>
+
+    <div class="hero-inner">
+      <div class="hero-logo-big">
+        <img src="logo.png" alt="Logo PGRI">
+      </div>
+      <div class="hero-badge">🌟 Selamat Datang</div>
+      <h1 class="hero-title">
+        PGRI Ranting <span>Gambirono</span>
+      </h1>
+      <p class="hero-sub">
+        Persatuan Guru Republik Indonesia · Ranting Gambirono<br>
+        Bersama membangun pendidikan yang lebih baik 💪
+      </p>
+      <div class="hero-cta">
+        <a href="pengurus/index.html" class="cta-btn cta-primary">👥 Kenalan Pengurus</a>
+        <a href="keuangan/index.html" class="cta-btn cta-secondary">💰 Lihat Keuangan</a>
+      </div>
+    </div>
+
+    <div class="hero-wave" aria-hidden="true">
+      <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+        <path fill="#fdfbff" d="M0,40 C240,90 480,0 720,30 C960,60 1200,10 1440,40 L1440,80 L0,80 Z"/>
+      </svg>
+    </div>
+  </section>
+
+  <main class="container">
+
+    <!-- STATS KAS -->
+    <div class="stats-sd">
+      <div class="stat-sd stat-blue">
+        <div class="stat-sd-icon">💰</div>
+        <div class="stat-sd-body">
+          <div class="stat-sd-label">Saldo Kas</div>
+          <div class="stat-sd-value" id="dashSaldo">Memuat...</div>
+        </div>
+      </div>
+      <div class="stat-sd stat-green">
+        <div class="stat-sd-icon">⬇️</div>
+        <div class="stat-sd-body">
+          <div class="stat-sd-label">Total Debet</div>
+          <div class="stat-sd-value" id="dashDebet">Memuat...</div>
+        </div>
+      </div>
+      <div class="stat-sd stat-pink">
+        <div class="stat-sd-icon">⬆️</div>
+        <div class="stat-sd-body">
+          <div class="stat-sd-label">Total Kredit</div>
+          <div class="stat-sd-value" id="dashKredit">Memuat...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MENU CARDS -->
+    <h2 class="menu-title">🎯 Jelajahi Website</h2>
+    <div class="menu-grid">
+      <a href="pengurus/index.html" class="menu-card menu-blue">
+        <div class="menu-emoji">👥</div>
+        <h3>Susunan Pengurus</h3>
+        <p>Kenalan dengan tim hebat yang mengurus ranting.</p>
+        <span class="menu-link">Lihat →</span>
+      </a>
+
+      <a href="program/index.html" class="menu-card menu-orange">
+        <div class="menu-emoji">📋</div>
+        <h3>Program Kerja</h3>
+        <p>Rencana dan agenda kegiatan yang akan dilaksanakan.</p>
+        <span class="menu-link">Lihat →</span>
+      </a>
+
+      <a href="keuangan/index.html" class="menu-card menu-green">
+        <div class="menu-emoji">💰</div>
+        <h3>Laporan Keuangan</h3>
+        <p>Transparansi pemasukan, pengeluaran, dan saldo kas.</p>
+        <span class="menu-link">Lihat →</span>
+      </a>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="logo.png" alt="Logo PGRI" class="footer-logo">
+        <span>PGRI Ranting Gambirono</span>
+      </div>
+      <p class="footer-copy">© 2026 PGRI Ranting Gambirono · Dibuat dengan ❤️</p>
+    </div>
+  </footer>
+
+  <!-- LOGIN MODAL -->
+  <div id="loginModal" class="modal hidden">
+    <div class="modal-backdrop" data-close-modal="login"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Login Admin</h2>
+        <button type="button" class="modal-close" data-close-modal="login">✕</button>
+      </div>
+      <form id="formLogin">
+        <div class="form-group">
+          <label for="inputPassword">Password</label>
+          <input type="password" id="inputPassword" placeholder="Masukkan password admin" required>
+        </div>
+        <div id="loginError" class="error-msg hidden"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" data-close-modal="login">Batal</button>
+          <button type="submit" class="btn btn-primary">Masuk</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

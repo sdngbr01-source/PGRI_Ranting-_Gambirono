@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Program Kerja · PGRI Ranting Gambirono</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="program.css">
+</head>
+<body class="page-program">
+
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="brand">
+        <div class="brand-logo"><img src="../logo.png" alt="Logo PGRI"></div>
+        <div class="brand-text-wrap">
+          <span class="brand-title">PGRI Ranting</span>
+          <span class="brand-subtitle">Gambirono</span>
+        </div>
+      </a>
+      <div class="header-actions">
+        <span id="adminBadge" class="admin-badge hidden"><span class="dot"></span> Admin</span>
+        <button id="loginBtn" class="btn btn-outline" type="button">Login Admin</button>
+        <button id="logoutBtn" class="btn btn-outline hidden" type="button">Logout</button>
+      </div>
+    </div>
+    <nav class="main-nav">
+      <div class="nav-inner">
+        <a href="../index.html" class="nav-link">🏠 Dashboard</a>
+        <a href="../pengurus/index.html" class="nav-link">👥 Susunan Pengurus</a>
+        <a href="index.html" class="nav-link active">📋 Program Kerja</a>
+        <a href="../keuangan/index.html" class="nav-link">💰 Laporan Keuangan</a>
+      </div>
+    </nav>
+  </header>
+
+  <section class="hero-sd">
+    <div class="hero-shapes" aria-hidden="true">
+      <span class="shape s1"></span><span class="shape s2"></span>
+      <span class="shape s3"></span><span class="shape s4"></span>
+      <span class="shape s5"></span>
+    </div>
+    <div class="hero-inner">
+      <div class="hero-badge">📋 Rencana Kegiatan</div>
+      <h1 class="hero-title">Program Kerja <span>Kami</span></h1>
+      <p class="hero-sub">
+        Agenda dan rencana kegiatan yang akan dilaksanakan
+        oleh pengurus PGRI Ranting Gambirono 🎯
+      </p>
+      <div class="hero-sd-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-icon">📊</div>
+          <div class="hero-stat-num" id="heroTotal">0</div>
+          <div class="hero-stat-label">Total</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-icon">🎯</div>
+          <div class="hero-stat-num" id="heroBerjalan">0</div>
+          <div class="hero-stat-label">Berjalan</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-icon">✅</div>
+          <div class="hero-stat-num" id="heroSelesai">0</div>
+          <div class="hero-stat-label">Selesai</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-wave" aria-hidden="true">
+      <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+        <path fill="#fdfbff" d="M0,40 C240,90 480,0 720,30 C960,60 1200,10 1440,40 L1440,80 L0,80 Z"/>
+      </svg>
+    </div>
+  </section>
+
+  <main class="container">
+
+    <div class="section-header-sd">
+      <div>
+        <h2 class="section-title-sd"><span class="title-icon">📋</span> Daftar Program</h2>
+        <p class="section-subtitle-sd">Agenda dan rencana kegiatan pengurus</p>
+      </div>
+      <button id="addProgramBtn" class="btn-ceria hidden" type="button">
+        <span class="btn-plus">＋</span> Tambah Program
+      </button>
+    </div>
+
+    <div class="chip-filter" id="chipFilter">
+      <button class="chip active" data-filter="">Semua</button>
+      <button class="chip" data-filter="Rencana">Rencana</button>
+      <button class="chip" data-filter="Berjalan">Berjalan</button>
+      <button class="chip" data-filter="Selesai">Selesai</button>
+    </div>
+
+    <div id="programList" class="program-list">
+      <div class="empty-state-sd">
+        <div class="spinner"></div>
+        <div>Memuat data program...</div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="../logo.png" alt="Logo PGRI" class="footer-logo">
+        <span>PGRI Ranting Gambirono</span>
+      </div>
+      <p class="footer-copy">© 2026 PGRI Ranting Gambirono · Dibuat dengan ❤️</p>
+    </div>
+  </footer>
+
+  <div id="loginModal" class="modal hidden">
+    <div class="modal-backdrop" data-close-modal="login"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Login Admin</h2>
+        <button type="button" class="modal-close" data-close-modal="login">✕</button>
+      </div>
+      <form id="formLogin">
+        <div class="form-group">
+          <label for="inputPassword">Password</label>
+          <input type="password" id="inputPassword" placeholder="Masukkan password admin" required>
+        </div>
+        <div id="loginError" class="error-msg hidden"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" data-close-modal="login">Batal</button>
+          <button type="submit" class="btn btn-primary">Masuk</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="programModal" class="modal hidden">
+    <div class="modal-backdrop" data-close-modal="program"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="programModalTitle">Tambah Program</h2>
+        <button type="button" class="modal-close" data-close-modal="program">✕</button>
+      </div>
+      <form id="formProgram">
+        <input type="hidden" id="programId" value="">
+        <div class="form-group">
+          <label for="programNama">Nama Program</label>
+          <input type="text" id="programNama" placeholder="Contoh: Pelatihan Guru" required>
+        </div>
+        <div class="form-group">
+          <label for="programDeskripsi">Deskripsi</label>
+          <input type="text" id="programDeskripsi" placeholder="Penjelasan singkat">
+        </div>
+        <div class="form-group">
+          <label for="programTanggal">Target / Tanggal</label>
+          <input type="text" id="programTanggal" placeholder="Contoh: Desember 2026">
+        </div>
+        <div class="form-group">
+          <label for="programStatus">Status</label>
+          <select id="programStatus">
+            <option value="Rencana">Rencana</option>
+            <option value="Berjalan">Berjalan</option>
+            <option value="Selesai">Selesai</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" data-close-modal="program">Batal</button>
+          <button type="submit" class="btn btn-primary">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../script.js"></script>
+  <script src="program.js"></script>
+</body>
+</html>
