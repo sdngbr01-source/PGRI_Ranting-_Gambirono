@@ -12,7 +12,8 @@ let isAdmin = !!token;
 document.addEventListener('DOMContentLoaded', () => {
   setupGlobalEvents();
   updateGlobalAuthUI();
-  loadDashboardStats();
+  loadDashboardKas();
+  loadDashboardAnggota();
 });
 
 function setupGlobalEvents() {
@@ -35,7 +36,7 @@ function setupGlobalEvents() {
   if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
 
   document.querySelectorAll('[data-close-modal="login"]').forEach(el => {
-    el.addEventListener('click', closeModal);
+    el.addEventListener('click', () => closeModal());
   });
 
   const formLogin = document.getElementById('formLogin');
@@ -66,7 +67,6 @@ async function handleLogin(e) {
       isAdmin = true;
       localStorage.setItem('adminToken', token);
       closeModal();
-      updateGlobalAuthUI();
       location.reload();
     } else {
       errorEl.textContent = data.message || 'Password salah';
@@ -105,13 +105,8 @@ function updateGlobalAuthUI() {
   }
 }
 
-// ============================================
-// MODAL
-// ============================================
-function closeModal(modalEl) {
-  if (modalEl) modalEl.classList.add('hidden');
-  else document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
-
+function closeModal() {
+  document.querySelectorAll('.modal').forEach(m => m.classList.add('hidden'));
   const pw  = document.getElementById('inputPassword');
   if (pw) pw.value = '';
   const err = document.getElementById('loginError');
@@ -119,9 +114,9 @@ function closeModal(modalEl) {
 }
 
 // ============================================
-// DASHBOARD STATS (hanya jika elemen ada)
+// DASHBOARD — KAS (3 kartu saja)
 // ============================================
-async function loadDashboardStats() {
+async function loadDashboardKas() {
   const elSaldo  = document.getElementById('dashSaldo');
   const elDebet  = document.getElementById('dashDebet');
   const elKredit = document.getElementById('dashKredit');
@@ -151,6 +146,29 @@ async function loadDashboardStats() {
 }
 
 // ============================================
+// DASHBOARD — ANGGOTA
+// ============================================
+async function loadDashboardAnggota() {
+  const elTotal = document.getElementById('dashTotalAnggota');
+  const elAktif = document.getElementById('dashAnggotaAktif');
+  if (!elTotal && !elAktif) return;
+
+  try {
+    const res = await fetch(`${API_URL}?action=getAnggota`, { redirect: 'follow' });
+    const result = await res.json();
+    if (result.status !== 'success') throw new Error(result.message);
+    const data = result.data || [];
+    if (elTotal) elTotal.textContent = data.length;
+    if (elAktif) elAktif.textContent = data.filter(a =>
+      (a.status || '').trim().toLowerCase() === 'aktif'
+    ).length;
+  } catch (err) {
+    if (elTotal) elTotal.textContent = '—';
+    if (elAktif) elAktif.textContent = '—';
+  }
+}
+
+// ============================================
 // UTILS
 // ============================================
 function formatRupiah(num) {
@@ -163,9 +181,7 @@ function formatTanggal(str) {
   if (!str) return '-';
   const d = new Date(str);
   if (isNaN(d)) return str;
-  return d.toLocaleDateString('id-ID', {
-    day: '2-digit', month: 'short', year: 'numeric'
-  });
+  return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
 function escapeHtml(str) {
@@ -176,11 +192,8 @@ function escapeHtml(str) {
 
 function escapeAttr(str) {
   return String(str || '')
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 function initials(name) {

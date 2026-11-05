@@ -14,6 +14,7 @@ const addBtn      = document.getElementById('addBtn');
 const filterBulan = document.getElementById('filterBulan');
 const drawer      = document.getElementById('drawer');
 const drawerOverlay = document.getElementById('drawerOverlay');
+const bukuKasSection = document.getElementById('bukuKasSection');
 
 // ============================================
 // INIT
@@ -21,25 +22,37 @@ const drawerOverlay = document.getElementById('drawerOverlay');
 document.addEventListener('DOMContentLoaded', () => {
   loadData();
   setupKeuanganEvents();
+  toggleAdminUI();
 });
 
 function setupKeuanganEvents() {
-  addBtn.addEventListener('click', () => openDrawer('add'));
-  document.getElementById('drawerClose').addEventListener('click', closeDrawer);
-  document.getElementById('drawerCancel').addEventListener('click', closeDrawer);
-  drawerOverlay.addEventListener('click', closeDrawer);
-  document.getElementById('formTransaksi').addEventListener('submit', handleSubmit);
-  document.getElementById('refreshBtn').addEventListener('click', loadData);
+  if (addBtn) addBtn.addEventListener('click', () => openDrawer('add'));
 
-  filterBulan.addEventListener('change', e => {
-    currentFilter = e.target.value;
-    renderAll();
-  });
+  const drawerClose  = document.getElementById('drawerClose');
+  const drawerCancel = document.getElementById('drawerCancel');
+  const formTransaksi= document.getElementById('formTransaksi');
+  const refreshBtn   = document.getElementById('refreshBtn');
 
-  document.getElementById('inputJumlah').addEventListener('input', e => {
-    const val = Number(e.target.value) || 0;
-    document.getElementById('jumlahPreview').textContent = formatRupiah(val);
-  });
+  if (drawerClose)  drawerClose.addEventListener('click', closeDrawer);
+  if (drawerCancel) drawerCancel.addEventListener('click', closeDrawer);
+  if (drawerOverlay) drawerOverlay.addEventListener('click', closeDrawer);
+  if (formTransaksi) formTransaksi.addEventListener('submit', handleSubmit);
+  if (refreshBtn)    refreshBtn.addEventListener('click', loadData);
+
+  if (filterBulan) {
+    filterBulan.addEventListener('change', e => {
+      currentFilter = e.target.value;
+      if (isAdmin) renderAll();
+    });
+  }
+
+  const inputJumlah = document.getElementById('inputJumlah');
+  if (inputJumlah) {
+    inputJumlah.addEventListener('input', e => {
+      const val = Number(e.target.value) || 0;
+      document.getElementById('jumlahPreview').textContent = formatRupiah(val);
+    });
+  }
 
   document.querySelectorAll('input[name="jenis"]').forEach(r => {
     r.addEventListener('change', updateJumlahLabel);
@@ -60,21 +73,31 @@ function updateJumlahLabel() {
 // LOAD
 // ============================================
 async function loadData() {
-  tbody.innerHTML = `<tr><td colspan="7" class="empty-state-sd"><div class="spinner"></div><div>Memuat...</div></td></tr>`;
+  if (isAdmin && tbody) {
+    tbody.innerHTML = `<tr><td colspan="7" class="empty-state-sd"><div class="spinner"></div><div>Memuat...</div></td></tr>`;
+  }
+
   try {
     const res = await fetch(`${API_URL}?action=getTransaksi`, { redirect: 'follow' });
     const result = await res.json();
     if (result.status !== 'success') throw new Error(result.message);
+
     allData = result.data || [];
     buildMonthFilter();
-    renderAll();
+    renderStats(allData);          // ← selalu untuk publik
+    if (isAdmin) renderAll();      // ← tabel hanya untuk admin
   } catch (err) {
-    tbody.innerHTML = `<tr><td colspan="7" class="empty-state-sd" style="color:#b91c1c">⚠️ ${escapeHtml(err.message)}</td></tr>`;
-    tfoot.classList.add('hidden');
+    if (isAdmin && tbody) {
+      tbody.innerHTML = `<tr><td colspan="7" class="empty-state-sd" style="color:#b91c1c">⚠️ ${escapeHtml(err.message)}</td></tr>`;
+    }
+    if (statSaldo)  statSaldo.textContent  = 'Error';
+    if (statDebet)  statDebet.textContent  = 'Error';
+    if (statKredit) statKredit.textContent = 'Error';
   }
 }
 
 function buildMonthFilter() {
+  if (!filterBulan) return;
   const months = new Set();
   allData.forEach(d => {
     if (d.tanggal && d.tanggal.length >= 7) months.add(d.tanggal.substring(0, 7));
@@ -99,30 +122,26 @@ function buildMonthFilter() {
 
 function getFilteredData() {
   let data = [...allData];
-  if (currentFilter) data = data.filter(d => d.tanggal.startsWith(currentFilter));
+  if (currentFilter) data = data.filter(d => d.tanggal && d.tanggal.startsWith(currentFilter));
   data.sort((a, b) => {
-    if (a.tanggal !== b.tanggal) return a.tanggal.localeCompare(b.tanggal);
+    if (a.tanggal !== b.tanggal) return (a.tanggal || '').localeCompare(b.tanggal || '');
     return String(a.id).localeCompare(String(b.id));
   });
   return data;
 }
 
 // ============================================
-// RENDER
+// RENDER (ADMIN ONLY)
 // ============================================
 function renderAll() {
   const data = getFilteredData();
   renderTable(data);
-  renderStats(data);
   updateSubtitle();
-
-  if (addBtn) addBtn.classList.toggle('hidden', !isAdmin);
-  document.querySelectorAll('.admin-only').forEach(el => {
-    el.classList.toggle('hidden', !isAdmin);
-  });
+  toggleAdminUI();
 }
 
 function updateSubtitle() {
+  if (!tableSubtitle) return;
   if (currentFilter) {
     const [y, mo] = currentFilter.split('-');
     const label = new Date(y, Number(mo) - 1).toLocaleDateString('id-ID', {
@@ -130,16 +149,16 @@ function updateSubtitle() {
     });
     tableSubtitle.textContent = `Menampilkan bulan ${label}`;
   } else {
-    tableSubtitle.textContent = isAdmin
-      ? 'Mode admin · bisa menambah, mengedit, menghapus'
-      : 'Menampilkan semua transaksi';
+    tableSubtitle.textContent = 'Mode admin · bisa menambah, mengedit, menghapus';
   }
 }
 
 function renderTable(data) {
+  if (!tbody) return;
+
   if (data.length === 0) {
     tbody.innerHTML = `<tr><td colspan="7" class="empty-state-sd">📭 Belum ada transaksi${currentFilter ? ' di bulan ini' : ''}.</td></tr>`;
-    tfoot.classList.add('hidden');
+    if (tfoot) tfoot.classList.add('hidden');
     return;
   }
 
@@ -152,15 +171,6 @@ function renderTable(data) {
     totalDebet  += debet;
     totalKredit += kredit;
 
-    const aksi = isAdmin
-      ? `<td class="admin-only text-center">
-           <div class="aksi-group">
-             <button class="btn btn-edit" onclick="editTransaksi('${escapeAttr(t.id)}')">✏️ Edit</button>
-             <button class="btn btn-hapus" onclick="hapusTransaksi('${escapeAttr(t.id)}')">🗑️ Hapus</button>
-           </div>
-         </td>`
-      : `<td class="admin-only hidden"></td>`;
-
     return `
       <tr>
         <td class="col-no">${i + 1}</td>
@@ -169,16 +179,26 @@ function renderTable(data) {
         <td class="text-right ${debet > 0 ? 'amount-income' : 'amount-null'}">${debet > 0 ? formatRupiah(debet) : '—'}</td>
         <td class="text-right ${kredit > 0 ? 'amount-expense' : 'amount-null'}">${kredit > 0 ? formatRupiah(kredit) : '—'}</td>
         <td class="text-right saldo ${saldo < 0 ? 'negative' : ''}">${formatRupiah(saldo)}</td>
-        ${aksi}
+        <td class="text-center">
+          <div class="aksi-group">
+            <button class="btn btn-edit" onclick="editTransaksi('${escapeAttr(t.id)}')">✏️ Edit</button>
+            <button class="btn btn-hapus" onclick="hapusTransaksi('${escapeAttr(t.id)}')">🗑️ Hapus</button>
+          </div>
+        </td>
       </tr>`;
   }).join('');
 
-  tfoot.classList.remove('hidden');
-  document.getElementById('totalDebetFooter').textContent  = formatRupiah(totalDebet);
-  document.getElementById('totalKreditFooter').textContent = formatRupiah(totalKredit);
-  document.getElementById('saldoAkhirFooter').textContent  = formatRupiah(saldo);
+  if (tfoot) {
+    tfoot.classList.remove('hidden');
+    document.getElementById('totalDebetFooter').textContent  = formatRupiah(totalDebet);
+    document.getElementById('totalKreditFooter').textContent = formatRupiah(totalKredit);
+    document.getElementById('saldoAkhirFooter').textContent  = formatRupiah(saldo);
+  }
 }
 
+// ============================================
+// RENDER STATS (PUBLIK — 3 KARTU)
+// ============================================
 function renderStats(data) {
   let debet = 0, kredit = 0;
   data.forEach(t => {
@@ -186,16 +206,31 @@ function renderStats(data) {
     kredit += Number(t.kredit) || 0;
   });
   const saldo = debet - kredit;
-  statDebet.textContent  = formatRupiah(debet);
-  statKredit.textContent = formatRupiah(kredit);
-  statSaldo.textContent  = formatRupiah(saldo);
-  statSaldo.style.color  = saldo < 0 ? '#dc2626' : '';
+  if (statDebet)  statDebet.textContent  = formatRupiah(debet);
+  if (statKredit) statKredit.textContent = formatRupiah(kredit);
+  if (statSaldo)  {
+    statSaldo.textContent = formatRupiah(saldo);
+    statSaldo.style.color = saldo < 0 ? '#dc2626' : '';
+  }
+}
+
+// ============================================
+// TOGGLE ADMIN UI
+// ============================================
+function toggleAdminUI() {
+  if (bukuKasSection) bukuKasSection.classList.toggle('hidden', !isAdmin);
+  if (addBtn) addBtn.classList.toggle('hidden', !isAdmin);
+  document.querySelectorAll('.admin-only').forEach(el => {
+    el.classList.toggle('hidden', !isAdmin);
+  });
 }
 
 // ============================================
 // DRAWER
 // ============================================
 function openDrawer(mode, data = null) {
+  if (!drawer || !isAdmin) return;
+
   const title  = document.getElementById('drawerTitle');
   const inputId = document.getElementById('inputId');
 
@@ -230,6 +265,7 @@ function openDrawer(mode, data = null) {
 }
 
 function closeDrawer() {
+  if (!drawer) return;
   drawer.classList.remove('open');
   drawerOverlay.classList.add('hidden');
   document.body.style.overflow = '';
@@ -240,6 +276,8 @@ function closeDrawer() {
 // ============================================
 async function handleSubmit(e) {
   e.preventDefault();
+  if (!isAdmin) return;
+
   const id = document.getElementById('inputId').value;
   const jenis = document.querySelector('input[name="jenis"]:checked').value;
   const jumlah = Number(document.getElementById('inputJumlah').value);
@@ -281,11 +319,13 @@ async function handleSubmit(e) {
 }
 
 function editTransaksi(id) {
+  if (!isAdmin) return;
   const data = allData.find(t => t.id === id);
   if (data) openDrawer('edit', data);
 }
 
 async function hapusTransaksi(id) {
+  if (!isAdmin) return;
   if (!confirm('Yakin ingin menghapus transaksi ini?')) return;
   try {
     const res = await fetch(API_URL, {

@@ -28,6 +28,7 @@
       <div class="nav-inner">
         <a href="../index.html" class="nav-link">🏠 Dashboard</a>
         <a href="../pengurus/index.html" class="nav-link">👥 Susunan Pengurus</a>
+        <a href="../anggota/index.html" class="nav-link">👨‍🏫 Anggota</a>
         <a href="../program/index.html" class="nav-link">📋 Program Kerja</a>
         <a href="index.html" class="nav-link active">💰 Laporan Keuangan</a>
       </div>
@@ -42,10 +43,9 @@
     </div>
     <div class="hero-inner">
       <div class="hero-badge">💰 Transparansi Kas</div>
-      <h1 class="hero-title">Buku <span>Kas</span> Kami</h1>
+      <h1 class="hero-title">Laporan <span>Keuangan</span></h1>
       <p class="hero-sub">
-        Catatan pemasukan dan pengeluaran PGRI Ranting Gambirono.
-        Terbuka dan transparan untuk semua anggota 🤝
+        Ringkasan pemasukan, pengeluaran, dan saldo kas PGRI Ranting Gambirono 🤝
       </p>
     </div>
     <div class="hero-wave" aria-hidden="true">
@@ -57,35 +57,39 @@
 
   <main class="container">
 
-    <div class="stats-sd">
+    <!-- ===== 3 KARTU: PUBLIK ===== -->
+    <div class="stats-sd" style="margin-top:-3rem;">
       <div class="stat-sd stat-blue">
         <div class="stat-sd-icon">💰</div>
         <div class="stat-sd-body">
           <div class="stat-sd-label">Saldo</div>
-          <div class="stat-sd-value" id="statSaldo">Rp 0</div>
+          <div class="stat-sd-value" id="statSaldo">Memuat...</div>
         </div>
       </div>
       <div class="stat-sd stat-green">
         <div class="stat-sd-icon">⬇️</div>
         <div class="stat-sd-body">
-          <div class="stat-sd-label">Total Debet</div>
-          <div class="stat-sd-value" id="statDebet">Rp 0</div>
+          <div class="stat-sd-label">Total Pemasukan</div>
+          <div class="stat-sd-value" id="statDebet">Memuat...</div>
         </div>
       </div>
       <div class="stat-sd stat-pink">
         <div class="stat-sd-icon">⬆️</div>
         <div class="stat-sd-body">
-          <div class="stat-sd-label">Total Kredit</div>
-          <div class="stat-sd-value" id="statKredit">Rp 0</div>
+          <div class="stat-sd-label">Total Pengeluaran</div>
+          <div class="stat-sd-value" id="statKredit">Memuat...</div>
         </div>
       </div>
     </div>
 
-    <section class="card-sd">
+    <!-- ===== BUKU KAS — ADMIN SAJA ===== -->
+    <section id="bukuKasSection" class="card-sd hidden">
       <div class="card-sd-header">
         <div>
-          <h2 class="card-sd-title">📒 Buku Kas</h2>
-          <p class="card-sd-sub" id="tableSubtitle">Menampilkan semua transaksi</p>
+          <h2 class="card-sd-title">📒 Buku Kas
+            <span style="font-size:0.68rem;background:#fef3c7;color:#92400e;padding:0.2rem 0.55rem;border-radius:999px;margin-left:0.35rem;vertical-align:middle;">ADMIN</span>
+          </h2>
+          <p class="card-sd-sub" id="tableSubtitle">Kelola transaksi kas</p>
         </div>
         <div class="card-sd-actions">
           <div class="filter-group">
@@ -95,7 +99,7 @@
             </select>
           </div>
           <button id="refreshBtn" class="btn-icon" type="button" title="Refresh">↻</button>
-          <button id="addBtn" class="btn-ceria hidden" type="button">
+          <button id="addBtn" class="btn-ceria" type="button">
             <span class="btn-plus">＋</span> Tambah
           </button>
         </div>
@@ -111,7 +115,7 @@
               <th class="text-right">Debet</th>
               <th class="text-right">Kredit</th>
               <th class="text-right">Saldo</th>
-              <th class="admin-only hidden col-aksi text-center">Aksi</th>
+              <th class="text-center col-aksi">Aksi</th>
             </tr>
           </thead>
           <tbody id="tbodyKas">
@@ -128,7 +132,7 @@
               <td class="text-right" id="totalDebetFooter">Rp 0</td>
               <td class="text-right" id="totalKreditFooter">Rp 0</td>
               <td class="text-right" id="saldoAkhirFooter">Rp 0</td>
-              <td class="admin-only hidden"></td>
+              <td></td>
             </tr>
           </tfoot>
         </table>

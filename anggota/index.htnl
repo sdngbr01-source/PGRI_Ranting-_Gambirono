@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Anggota · PGRI Ranting Gambirono</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="anggota.css">
+</head>
+<body class="page-anggota">
+
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="brand">
+        <div class="brand-logo"><img src="../logo.png" alt="Logo PGRI"></div>
+        <div class="brand-text-wrap">
+          <span class="brand-title">PGRI Ranting</span>
+          <span class="brand-subtitle">Gambirono</span>
+        </div>
+      </a>
+      <div class="header-actions">
+        <span id="adminBadge" class="admin-badge hidden"><span class="dot"></span> Admin</span>
+        <button id="loginBtn" class="btn btn-outline" type="button">Login Admin</button>
+        <button id="logoutBtn" class="btn btn-outline hidden" type="button">Logout</button>
+      </div>
+    </div>
+    <nav class="main-nav">
+      <div class="nav-inner">
+        <a href="../index.html" class="nav-link">🏠 Dashboard</a>
+        <a href="../pengurus/index.html" class="nav-link">👥 Susunan Pengurus</a>
+        <a href="index.html" class="nav-link active">👨‍🏫 Anggota</a>
+        <a href="../program/index.html" class="nav-link">📋 Program Kerja</a>
+        <a href="../keuangan/index.html" class="nav-link">💰 Laporan Keuangan</a>
+      </div>
+    </nav>
+  </header>
+
+  <section class="hero-sd">
+    <div class="hero-shapes" aria-hidden="true">
+      <span class="shape s1"></span><span class="shape s2"></span>
+      <span class="shape s3"></span><span class="shape s4"></span>
+      <span class="shape s5"></span>
+    </div>
+    <div class="hero-inner">
+      <div class="hero-badge">👨‍🏫 Data Anggota</div>
+      <h1 class="hero-title">Anggota <span>PGRI</span></h1>
+      <p class="hero-sub">
+        Daftar anggota PGRI Ranting Gambirono lengkap dengan NPA,
+        unit kerja, dan status keanggotaan 📋
+      </p>
+      <div class="hero-sd-stats">
+        <div class="hero-stat">
+          <div class="hero-stat-icon">👥</div>
+          <div class="hero-stat-num" id="heroTotalAnggota">0</div>
+          <div class="hero-stat-label">Total</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-icon">✅</div>
+          <div class="hero-stat-num" id="heroAktif">0</div>
+          <div class="hero-stat-label">Aktif</div>
+        </div>
+        <div class="hero-stat">
+          <div class="hero-stat-icon">🏫</div>
+          <div class="hero-stat-num" id="heroUnit">0</div>
+          <div class="hero-stat-label">Unit Kerja</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-wave" aria-hidden="true">
+      <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
+        <path fill="#fdfbff" d="M0,40 C240,90 480,0 720,30 C960,60 1200,10 1440,40 L1440,80 L0,80 Z"/>
+      </svg>
+    </div>
+  </section>
+
+  <main class="container">
+
+    <section class="card-sd">
+      <div class="card-sd-header">
+        <div>
+          <h2 class="card-sd-title">👨‍🏫 Daftar Anggota</h2>
+          <p class="card-sd-sub" id="tableSubtitle">Menampilkan semua anggota</p>
+        </div>
+        <div class="card-sd-actions">
+          <div class="filter-group">
+            <label for="filterStatus">Status</label>
+            <select id="filterStatus">
+              <option value="">Semua Status</option>
+            </select>
+          </div>
+          <input type="text" id="searchAnggota" placeholder="🔍 Cari nama/NPA..."
+                 style="padding:0.5rem 0.8rem;border:2px solid var(--line);border-radius:12px;font-family:inherit;font-size:0.85rem;font-weight:600;min-width:180px;">
+          <button id="refreshBtn" class="btn-icon" type="button" title="Refresh">↻</button>
+          <button id="addBtn" class="btn-ceria hidden" type="button">
+            <span class="btn-plus">＋</span> Tambah
+          </button>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table id="tabelAnggota">
+          <thead>
+            <tr>
+              <th class="col-no">No</th>
+              <th>Nama</th>
+              <th>NPA</th>
+              <th>Unit Kerja</th>
+              <th>Status</th>
+              <th>Keterangan</th>
+              <th class="admin-only hidden col-aksi text-center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyAnggota">
+            <tr>
+              <td colspan="7" class="empty-state-sd">
+                <div class="spinner"></div>
+                <div>Memuat data...</div>
+              </td>
+            </tr>
+          </tbody>
+          <tfoot id="tfootAnggota" class="hidden">
+            <tr>
+              <td colspan="4" class="text-right">Total</td>
+              <td colspan="3" id="totalAnggotaFooter">0 anggota</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="../logo.png" alt="Logo PGRI" class="footer-logo">
+        <span>PGRI Ranting Gambirono</span>
+      </div>
+      <p class="footer-copy">© 2026 PGRI Ranting Gambirono · Dibuat dengan ❤️</p>
+    </div>
+  </footer>
+
+  <div id="loginModal" class="modal hidden">
+    <div class="modal-backdrop" data-close-modal="login"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Login Admin</h2>
+        <button type="button" class="modal-close" data-close-modal="login">✕</button>
+      </div>
+      <form id="formLogin">
+        <div class="form-group">
+          <label for="inputPassword">Password</label>
+          <input type="password" id="inputPassword" placeholder="Masukkan password admin" required>
+        </div>
+        <div id="loginError" class="error-msg hidden"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" data-close-modal="login">Batal</button>
+          <button type="submit" class="btn btn-primary">Masuk</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="drawerOverlay" class="drawer-overlay hidden"></div>
+  <aside id="drawer" class="drawer">
+    <div class="drawer-header">
+      <h2 id="drawerTitle">Tambah Anggota</h2>
+      <button type="button" class="drawer-close" id="drawerClose">✕</button>
+    </div>
+    <form id="formAnggota" class="drawer-body">
+      <input type="hidden" id="inputId" value="">
+      <div class="form-group">
+        <label for="inputNama">Nama Lengkap</label>
+        <input type="text" id="inputNama" placeholder="Nama anggota" required>
+      </div>
+      <div class="form-group">
+        <label for="inputNpa">NPA (Nomor Pokok Anggota)</label>
+        <input type="text" id="inputNpa" placeholder="Contoh: 1234567890">
+      </div>
+      <div class="form-group">
+        <label for="inputUnit">Unit Kerja</label>
+        <input type="text" id="inputUnit" placeholder="Contoh: SDN Gambirono 1">
+      </div>
+      <div class="form-group">
+        <label for="inputStatus">Status</label>
+        <select id="inputStatus">
+          <option value="Aktif">Aktif</option>
+          <option value="Tidak Aktif">Tidak Aktif</option>
+          <option value="Pensiun">Pensiun</option>
+          <option value="Mutasi">Mutasi</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="inputKeterangan">Keterangan</label>
+        <input type="text" id="inputKeterangan" placeholder="Catatan tambahan (opsional)">
+      </div>
+      <div class="drawer-footer">
+        <button type="button" class="btn btn-ghost" id="drawerCancel">Batal</button>
+        <button type="submit" class="btn btn-primary" id="submitBtn">Simpan</button>
+      </div>
+    </form>
+  </aside>
+
+  <script src="../script.js"></script>
+  <script src="anggota.js"></script>
+</body>
+</html>
