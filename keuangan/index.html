@@ -57,8 +57,19 @@
 
   <main class="container">
 
+    <!-- ===== FILTER BULAN (PUBLIK + ADMIN) ===== -->
+    <div class="filter-bulan-bar">
+      <div class="filter-bulan-group">
+        <label for="filterBulan">📅 Filter Bulan</label>
+        <select id="filterBulan">
+          <option value="">Semua Bulan</option>
+        </select>
+      </div>
+      <div class="filter-bulan-info" id="filterInfo">Menampilkan semua transaksi</div>
+    </div>
+
     <!-- ===== 3 KARTU: PUBLIK ===== -->
-    <div class="stats-sd" style="margin-top:-3rem;">
+    <div class="stats-sd" style="margin-top:0;">
       <div class="stat-sd stat-blue">
         <div class="stat-sd-icon">💰</div>
         <div class="stat-sd-body">
@@ -92,12 +103,6 @@
           <p class="card-sd-sub" id="tableSubtitle">Kelola transaksi kas</p>
         </div>
         <div class="card-sd-actions">
-          <div class="filter-group">
-            <label for="filterBulan">Bulan</label>
-            <select id="filterBulan">
-              <option value="">Semua Bulan</option>
-            </select>
-          </div>
           <button id="refreshBtn" class="btn-icon" type="button" title="Refresh">↻</button>
           <button id="addBtn" class="btn-ceria" type="button">
             <span class="btn-plus">＋</span> Tambah
