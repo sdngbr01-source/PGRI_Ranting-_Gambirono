@@ -27,7 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupKeuanganEvents() {
-  // Tombol tambah (admin)
   if (addBtn) addBtn.addEventListener('click', () => openDrawer('add'));
 
   const drawerClose   = document.getElementById('drawerClose');
@@ -41,18 +40,20 @@ function setupKeuanganEvents() {
   if (formTransaksi) formTransaksi.addEventListener('submit', handleSubmit);
   if (refreshBtn)    refreshBtn.addEventListener('click', loadData);
 
-  // FILTER BULAN — berlaku untuk SEMUA user (publik & admin)
+  // Handler saat filter bulan diubah
   if (filterBulan) {
     filterBulan.addEventListener('change', e => {
       currentFilter = e.target.value;
       const filtered = getFilteredData();
+      
+      // Render 3 kartu (Dashboard Publik)
       renderStats(filtered);
+      
       updateFilterInfo();
       if (isAdmin) renderAll();
     });
   }
 
-  // Preview jumlah
   const inputJumlah = document.getElementById('inputJumlah');
   if (inputJumlah) {
     inputJumlah.addEventListener('input', e => {
@@ -62,12 +63,10 @@ function setupKeuanganEvents() {
     });
   }
 
-  // Label jenis transaksi
   document.querySelectorAll('input[name="jenis"]').forEach(r => {
     r.addEventListener('change', updateJumlahLabel);
   });
 
-  // ESC untuk tutup drawer
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') closeDrawer();
   });
@@ -84,7 +83,7 @@ function updateJumlahLabel() {
 }
 
 // ============================================
-// LOAD
+// LOAD DATA (Hitung Saldo Mandiri di Frontend)
 // ============================================
 async function loadData() {
   if (isAdmin && tbody) {
@@ -94,13 +93,43 @@ async function loadData() {
   try {
     const res = await fetch(`${API_URL}?action=getTransaksi`, { redirect: 'follow' });
     const result = await res.json();
+    
     if (result.status !== 'success') throw new Error(result.message || 'Gagal memuat');
 
-    allData = result.data || [];
+    let rawData = result.data || [];
+    
+    // Sort berdasarkan tanggal, lalu ID
+    rawData.sort((a, b) => {
+      if (a.tanggal !== b.tanggal) return (a.tanggal || '').localeCompare(b.tanggal || '');
+      return String(a.id).localeCompare(String(b.id));
+    });
+
+    // === HITUNG SALDO BERJALAN (Running Balance) SECARA MANDIRI ===
+    let saldoBerjalan = 0;
+    allData = rawData.map(t => {
+      const debet  = Number(t.debet)  || 0;
+      const kredit = Number(t.kredit) || 0;
+      
+      // Rumus: Saldo Sebelumnya + Debet - Kredit
+      saldoBerjalan += debet - kredit;
+      
+      return {
+        ...t,
+        debet: debet,
+        kredit: kredit,
+        saldo: saldoBerjalan // Timpa data saldo dari backend dengan hitungan lokal
+      };
+    });
+
     buildMonthFilter();
     updateFilterInfo();
+    
+    // Render 3 kartu
     renderStats(getFilteredData());
+    
+    // Render tabel admin
     if (isAdmin) renderAll();
+
   } catch (err) {
     if (isAdmin && tbody) {
       tbody.innerHTML = `<tr><td colspan="7" class="empty-state-sd" style="color:#b91c1c">⚠️ ${escapeHtml(err.message)}</td></tr>`;
@@ -144,16 +173,9 @@ function getFilteredData() {
   if (currentFilter) {
     data = data.filter(d => d.tanggal && d.tanggal.startsWith(currentFilter));
   }
-  data.sort((a, b) => {
-    if (a.tanggal !== b.tanggal) return (a.tanggal || '').localeCompare(b.tanggal || '');
-    return String(a.id).localeCompare(String(b.id));
-  });
   return data;
 }
 
-// ============================================
-// INFO FILTER (tampil untuk semua user)
-// ============================================
 function updateFilterInfo() {
   if (!filterInfo) return;
   const filtered = getFilteredData();
@@ -170,7 +192,39 @@ function updateFilterInfo() {
 }
 
 // ============================================
-// RENDER (ADMIN ONLY — tabel buku kas)
+// RENDER STATS PUBLIK (3 KARTU)
+// ============================================
+function renderStats(data) {
+  if (!data || data.length === 0) {
+    if (statDebet)  statDebet.textContent  = formatRupiah(0);
+    if (statKredit) statKredit.textContent = formatRupiah(0);
+    if (statSaldo)  statSaldo.textContent  = formatRupiah(0);
+    return;
+  }
+
+  // 1. Hitung total pemasukan & pengeluaran untuk periode terfilter
+  let debet = 0, kredit = 0;
+  data.forEach(t => {
+    debet  += Number(t.debet)  || 0;
+    kredit += Number(t.kredit) || 0;
+  });
+
+  // 2. Ambil saldo dari baris TERAKHIR di data yang terfilter
+  // Karena kita sudah menghitung `saldo` secara berjalan di loadData(), 
+  // nilai saldo pada baris terakhir sudah mencakup saldo dari bulan-bulan sebelumnya.
+  const lastRow = data[data.length - 1];
+  const saldoAkhir = Number(lastRow.saldo) || 0;
+
+  if (statDebet)  statDebet.textContent  = formatRupiah(debet);
+  if (statKredit) statKredit.textContent = formatRupiah(kredit);
+  if (statSaldo)  {
+    statSaldo.textContent = formatRupiah(saldoAkhir);
+    statSaldo.style.color = saldoAkhir < 0 ? '#dc2626' : '';
+  }
+}
+
+// ============================================
+// RENDER TABEL (ADMIN)
 // ============================================
 function renderAll() {
   const data = getFilteredData();
@@ -192,6 +246,10 @@ function updateSubtitle() {
   }
 }
 
+function isSaldoAwal(uraian) {
+  return /^Saldo Awal Bulan/i.test(String(uraian || '').trim());
+}
+
 function renderTable(data) {
   if (!tbody) return;
 
@@ -201,17 +259,23 @@ function renderTable(data) {
     return;
   }
 
-  let saldo = 0, totalDebet = 0, totalKredit = 0;
+  let totalDebet = 0, totalKredit = 0;
+  let saldoAkhir = 0;
 
   tbody.innerHTML = data.map((t, i) => {
     const debet  = Number(t.debet)  || 0;
     const kredit = Number(t.kredit) || 0;
-    saldo += debet - kredit;
+    const saldo  = Number(t.saldo)  || 0; // Ini dari hitungan mandiri loadData
+
     totalDebet  += debet;
     totalKredit += kredit;
+    
+    if (i === data.length - 1) saldoAkhir = saldo;
+
+    const rowClass = isSaldoAwal(t.uraian) ? 'row-saldo-awal' : '';
 
     return `
-      <tr>
+      <tr class="${rowClass}">
         <td class="col-no">${i + 1}</td>
         <td class="col-tgl">${formatTanggal(t.tanggal)}</td>
         <td>${escapeHtml(t.uraian)}</td>
@@ -231,26 +295,7 @@ function renderTable(data) {
     tfoot.classList.remove('hidden');
     document.getElementById('totalDebetFooter').textContent  = formatRupiah(totalDebet);
     document.getElementById('totalKreditFooter').textContent = formatRupiah(totalKredit);
-    document.getElementById('saldoAkhirFooter').textContent  = formatRupiah(saldo);
-  }
-}
-
-// ============================================
-// RENDER STATS (PUBLIK — 3 KARTU, IKUT FILTER)
-// ============================================
-function renderStats(data) {
-  let debet = 0, kredit = 0;
-  data.forEach(t => {
-    debet  += Number(t.debet)  || 0;
-    kredit += Number(t.kredit) || 0;
-  });
-  const saldo = debet - kredit;
-
-  if (statDebet)  statDebet.textContent  = formatRupiah(debet);
-  if (statKredit) statKredit.textContent = formatRupiah(kredit);
-  if (statSaldo)  {
-    statSaldo.textContent = formatRupiah(saldo);
-    statSaldo.style.color = saldo < 0 ? '#dc2626' : '';
+    document.getElementById('saldoAkhirFooter').textContent  = formatRupiah(saldoAkhir);
   }
 }
 
@@ -266,7 +311,7 @@ function toggleAdminUI() {
 }
 
 // ============================================
-// DRAWER
+// DRAWER & SUBMIT
 // ============================================
 function openDrawer(mode, data = null) {
   if (!drawer || !isAdmin) return;
@@ -312,9 +357,6 @@ function closeDrawer() {
   document.body.style.overflow = '';
 }
 
-// ============================================
-// SUBMIT
-// ============================================
 async function handleSubmit(e) {
   e.preventDefault();
   if (!isAdmin) return;

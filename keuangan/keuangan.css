@@ -2,7 +2,7 @@
    HALAMAN KEUANGAN — TEMA SD CERIA
 ============================================================ */
 
-/* ---------- FILTER BULAN BAR (publik + admin) ---------- */
+/* ---------- FILTER BULAN BAR ---------- */
 .filter-bulan-bar {
   display: flex;
   justify-content: space-between;
@@ -155,6 +155,17 @@ td.text-right {
 
 td.saldo { font-weight: 900; color: var(--sd-ink); }
 td.saldo.negative { color: #dc2626; }
+
+/* Baris saldo awal (highlight) */
+tbody tr.row-saldo-awal {
+  background: linear-gradient(90deg, #fef3c7 0%, #fff 100%) !important;
+  border-left: 4px solid #f59e0b;
+}
+tbody tr.row-saldo-awal td {
+  font-weight: 800;
+  color: #78350f;
+}
+tbody tr.row-saldo-awal:hover { background: #fde68a !important; }
 
 .aksi-group {
   display: inline-flex; gap: 0.3rem; justify-content: center;
