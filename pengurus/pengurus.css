@@ -72,7 +72,7 @@
   z-index: 0;
 }
 
-/* ---------- FOTO ---------- */
+/* ---------- FOTO (FIX TERPOTONG) ---------- */
 .pengurus-foto {
   position: relative;
   z-index: 1;
@@ -83,11 +83,14 @@
   background: #fff;
   padding: 5px;
   box-shadow: 0 10px 24px rgba(0,0,0,.18);
+  overflow: hidden; /* Memastikan foto tidak keluar dari frame */
 }
+
 .pengurus-foto img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center 20%; /* Fokus ke area wajah (atas) */
   border-radius: 50%;
   display: block;
   background: #f1f5f9;
@@ -95,8 +98,10 @@
   box-shadow: 0 0 0 3px var(--c1, #4facfe);
   transition: transform 0.3s ease;
 }
+
+/* Efek Zoom Foto Saat Hover */
 .pengurus-card:hover .pengurus-foto img {
-  transform: scale(1.06);
+  transform: scale(1.15); /* Zoom 15% */
 }
 
 /* Avatar fallback (inisial) */

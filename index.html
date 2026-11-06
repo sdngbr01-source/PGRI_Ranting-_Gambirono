@@ -1,3 +1,4 @@
+<!-- index.html (dashboard) -->
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -24,17 +25,19 @@
       </div>
     </div>
     <nav class="main-nav">
-      <div class="nav-inner">
-        <a href="index.html" class="nav-link active">🏠 Dashboard</a>
-        <a href="pengurus/index.html" class="nav-link">👥 Susunan Pengurus</a>
-        <a href="anggota/index.html" class="nav-link">👨‍🏫 Anggota</a>
-        <a href="program/index.html" class="nav-link">📋 Program Kerja</a>
-        <a href="keuangan/index.html" class="nav-link">💰 Laporan Keuangan</a>
-      </div>
-    </nav>
+  <div class="nav-inner">
+    <a href="index.html" class="nav-link active">🏠 Dashboard</a>
+    <a href="pengurus/index.html" class="nav-link">👥 Susunan Pengurus</a>
+    <a href="anggota/index.html" class="nav-link">👨‍🏫 Anggota</a>
+    <a href="program/index.html" class="nav-link">📋 Program Kerja</a>
+    <a href="keuangan/index.html" class="nav-link">💰 Laporan Keuangan</a>
+    <a href="iuran/index.html" class="nav-link">📅 Rekap Iuran</a>
+  </div>
+</nav>
   </header>
 
-  <section class="hero-sd">
+  <!-- HERO FULL SCREEN WELCOME -->
+  <section class="hero-welcome">
     <div class="hero-shapes" aria-hidden="true">
       <span class="shape s1"></span><span class="shape s2"></span>
       <span class="shape s3"></span><span class="shape s4"></span>
@@ -50,90 +53,10 @@
       </p>
       <div class="hero-cta">
         <a href="pengurus/index.html" class="cta-btn cta-primary">👥 Kenalan Pengurus</a>
-        <a href="keuangan/index.html" class="cta-btn cta-secondary">💰 Lihat Keuangan</a>
+        <a href="iuran/index.html" class="cta-btn cta-secondary">📅 Cek Iuran</a>
       </div>
-    </div>
-    <div class="hero-wave" aria-hidden="true">
-      <svg viewBox="0 0 1440 80" preserveAspectRatio="none">
-        <path fill="#fdfbff" d="M0,40 C240,90 480,0 720,30 C960,60 1200,10 1440,40 L1440,80 L0,80 Z"/>
-      </svg>
     </div>
   </section>
-
-  <main class="container">
-
-    <h2 class="menu-title" style="margin-top:0;">💰 Ringkasan Kas</h2>
-    <div class="stats-sd" style="margin-top:0;">
-      <div class="stat-sd stat-blue">
-        <div class="stat-sd-icon">💰</div>
-        <div class="stat-sd-body">
-          <div class="stat-sd-label">Saldo Kas</div>
-          <div class="stat-sd-value" id="dashSaldo">Memuat...</div>
-        </div>
-      </div>
-      <div class="stat-sd stat-green">
-        <div class="stat-sd-icon">⬇️</div>
-        <div class="stat-sd-body">
-          <div class="stat-sd-label">Total Pemasukan</div>
-          <div class="stat-sd-value" id="dashDebet">Memuat...</div>
-        </div>
-      </div>
-      <div class="stat-sd stat-pink">
-        <div class="stat-sd-icon">⬆️</div>
-        <div class="stat-sd-body">
-          <div class="stat-sd-label">Total Pengeluaran</div>
-          <div class="stat-sd-value" id="dashKredit">Memuat...</div>
-        </div>
-      </div>
-    </div>
-
-    <h2 class="menu-title">👥 Ringkasan Anggota</h2>
-    <div class="stats-sd" style="margin-top:0; grid-template-columns: repeat(2, 1fr);">
-      <div class="stat-sd stat-green">
-        <div class="stat-sd-icon">👥</div>
-        <div class="stat-sd-body">
-          <div class="stat-sd-label">Total Anggota</div>
-          <div class="stat-sd-value" id="dashTotalAnggota">Memuat...</div>
-        </div>
-      </div>
-      <div class="stat-sd stat-blue">
-        <div class="stat-sd-icon">✅</div>
-        <div class="stat-sd-body">
-          <div class="stat-sd-label">Anggota Aktif</div>
-          <div class="stat-sd-value" id="dashAnggotaAktif">Memuat...</div>
-        </div>
-      </div>
-    </div>
-
-    <h2 class="menu-title">🎯 Jelajahi Website</h2>
-    <div class="menu-grid">
-      <a href="pengurus/index.html" class="menu-card menu-blue">
-        <div class="menu-emoji">👥</div>
-        <h3>Susunan Pengurus</h3>
-        <p>Kenalan dengan tim hebat yang mengurus ranting.</p>
-        <span class="menu-link">Lihat →</span>
-      </a>
-      <a href="anggota/index.html" class="menu-card menu-orange">
-        <div class="menu-emoji">👨‍🏫</div>
-        <h3>Data Anggota</h3>
-        <p>Daftar anggota PGRI Ranting Gambirono beserta NPA &amp; unit kerja.</p>
-        <span class="menu-link">Lihat →</span>
-      </a>
-      <a href="program/index.html" class="menu-card menu-green">
-        <div class="menu-emoji">📋</div>
-        <h3>Program Kerja</h3>
-        <p>Rencana dan agenda kegiatan yang akan dilaksanakan.</p>
-        <span class="menu-link">Lihat →</span>
-      </a>
-      <a href="keuangan/index.html" class="menu-card menu-blue">
-        <div class="menu-emoji">💰</div>
-        <h3>Laporan Keuangan</h3>
-        <p>Ringkasan pemasukan, pengeluaran, dan saldo kas.</p>
-        <span class="menu-link">Lihat →</span>
-      </a>
-    </div>
-
-  </main>
 
   <footer class="footer">
     <div class="footer-inner">

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rekap Iuran · PGRI Ranting Gambirono</title>
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="iuran.css">
+</head>
+<body class="page-iuran">
+
+  <header class="header">
+    <div class="header-inner">
+      <a href="../index.html" class="brand">
+        <div class="brand-logo"><img src="../logo.png" alt="Logo PGRI"></div>
+        <div class="brand-text-wrap">
+          <span class="brand-title">PGRI Ranting</span>
+          <span class="brand-subtitle">Gambirono</span>
+        </div>
+      </a>
+      <div class="header-actions">
+        <span id="adminBadge" class="admin-badge hidden"><span class="dot"></span> Admin</span>
+        <button id="loginBtn" class="btn btn-outline" type="button">Login Admin</button>
+        <button id="logoutBtn" class="btn btn-outline hidden" type="button">Logout</button>
+      </div>
+    </div>
+    <nav class="main-nav">
+      <div class="nav-inner">
+        <a href="../index.html" class="nav-link">🏠 Dashboard</a>
+        <a href="../pengurus/index.html" class="nav-link">👥 Susunan Pengurus</a>
+        <a href="../anggota/index.html" class="nav-link">👨‍🏫 Anggota</a>
+        <a href="../program/index.html" class="nav-link">📋 Program Kerja</a>
+        <a href="../keuangan/index.html" class="nav-link">💰 Laporan Keuangan</a>
+        <a href="../iuran/index.html" class="nav-link active">📅 Rekap Iuran</a>
+      </div>
+    </nav>
+  </header>
+
+  <section class="page-header-simple">
+    <div class="page-header-inner">
+      <h1>📅 Rekap Iuran</h1>
+      <p>Status pembayaran iuran per lembaga / unit kerja</p>
+    </div>
+  </section>
+
+  <main class="container">
+
+    <!-- SLIDE LEMBAGA -->
+    <div class="lembaga-slider">
+      <div class="lembaga-slide" id="lembagaSlide">
+        <div class="spinner"></div>
+        <div class="lembaga-empty">Memuat data iuran...</div>
+      </div>
+      <div class="slider-controls">
+        <button class="slider-btn" id="prevSlide" type="button">‹</button>
+        <div class="slider-dots" id="sliderDots"></div>
+        <button class="slider-btn" id="nextSlide" type="button">›</button>
+      </div>
+      <div class="slider-progress"><div class="slider-progress-bar" id="sliderProgress"></div></div>
+    </div>
+
+    <!-- LEGENDA -->
+    <div class="legend-bar">
+      <span class="legend-item"><span class="legend-dot bayar"></span> Sudah Bayar</span>
+      <span class="legend-item"><span class="legend-dot belum"></span> Belum Bayar</span>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="../logo.png" alt="Logo PGRI" class="footer-logo">
+        <span>PGRI Ranting Gambirono</span>
+      </div>
+      <p class="footer-copy">© 2026 PGRI Ranting Gambirono · Dibuat dengan ❤️</p>
+    </div>
+  </footer>
+
+  <!-- LOGIN MODAL -->
+  <div id="loginModal" class="modal hidden">
+    <div class="modal-backdrop" data-close-modal="login"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Login Admin</h2>
+        <button type="button" class="modal-close" data-close-modal="login">✕</button>
+      </div>
+      <form id="formLogin">
+        <div class="form-group">
+          <label for="inputPassword">Password</label>
+          <input type="password" id="inputPassword" placeholder="Masukkan password admin" required>
+        </div>
+        <div id="loginError" class="error-msg hidden"></div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" data-close-modal="login">Batal</button>
+          <button type="submit" class="btn btn-primary">Masuk</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../script.js"></script>
+  <script src="iuran.js"></script>
+</body>
+</html>

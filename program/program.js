@@ -1,6 +1,7 @@
 // ============================================
-// STATE
+// program/program.js
 // ============================================
+
 let programData = [];
 let filteredData = [];
 let activeFilter = '';
@@ -102,6 +103,18 @@ function renderProgram() {
     const status = (p.status || 'Rencana');
     const statusClass = `status-${status.toLowerCase()}`;
 
+    // --- LOGIKA FORMAT TANGGAL ---
+    let targetText = p.target || '';
+    if (targetText) {
+      const d = new Date(targetText);
+      // Jika format dari Google Sheets (ISO Date) valid, ubah ke teks Bahasa Indonesia
+      if (!isNaN(d.getTime())) {
+        // Akan menghasilkan contoh: "November 2026"
+        targetText = d.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+      }
+    }
+    // -----------------------------
+
     return `
       <div class="program-card">
         <div class="program-card-body">
@@ -110,7 +123,9 @@ function renderProgram() {
             <span class="status-badge ${statusClass}">${escapeHtml(status)}</span>
           </div>
           ${p.deskripsi ? `<p class="program-desc">${escapeHtml(p.deskripsi)}</p>` : ''}
-          ${p.target ? `<div class="program-meta">🎯 Target: ${escapeHtml(p.target)}</div>` : ''}
+          
+          <!-- Tampilkan targetText yang sudah diformat -->
+          ${targetText ? `<div class="program-meta">🎯 Target: ${escapeHtml(targetText)}</div>` : ''}
         </div>
         <div class="program-card-actions admin-only ${isAdmin ? '' : 'hidden'}">
           <button class="btn btn-edit" onclick="editProgram('${escapeAttr(p.id)}')">✏️ Edit</button>
@@ -140,7 +155,16 @@ function openProgramModal(mode, data = null) {
     document.getElementById('programId').value        = data.id;
     document.getElementById('programNama').value      = data.nama;
     document.getElementById('programDeskripsi').value = data.deskripsi || '';
-    document.getElementById('programTanggal').value   = data.target || '';
+    
+    // Format tanggal untuk edit (jika masih format ISO, ubah ke YYYY-MM-DD agar input date bisa membacanya)
+    // Atau jika Anda menggunakan input text bebas, biarkan saja.
+    let targetVal = data.target || '';
+    if (targetVal.includes('T')) {
+       // Jika formatnya ISO, potong jadi YYYY-MM-DD
+       targetVal = targetVal.split('T')[0]; 
+    }
+    document.getElementById('programTanggal').value   = targetVal;
+    
     document.getElementById('programStatus').value    = data.status || 'Rencana';
   } else {
     title.textContent = 'Tambah Program';

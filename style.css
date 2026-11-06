@@ -696,3 +696,27 @@ body {
   .modal-content { padding: 1.35rem; }
   .footer-inner { flex-direction: column; text-align: center; gap: 0.4rem; }
 }
+
+/* Hero Welcome Full */
+.hero-welcome {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #ffb347 0%, #ff6b9d 45%, #a78bfa 100%);
+  color: #fff;
+  padding: 4rem 1.5rem;
+  text-align: center;
+  min-height: calc(100vh - 130px);
+}
+.hero-welcome .hero-inner { position: relative; z-index: 2; max-width: 760px; margin: 0 auto; }
+.hero-welcome .hero-logo-big {
+  width: 110px; height: 110px; margin: 0 auto 1.2rem;
+  background: #fff; border-radius: 50%; padding: 8px;
+  box-shadow: 0 10px 26px rgba(0,0,0,.2);
+  display: flex; align-items: center; justify-content: center;
+  animation: floatLogo 4s ease-in-out infinite;
+}
+.hero-welcome .hero-logo-big img { width: 100%; height: 100%; object-fit: contain; }

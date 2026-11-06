@@ -1,25 +1,26 @@
 // ============================================
-// STATE
+// anggota/anggota.js
 // ============================================
+
 let allAnggota = [];
 let currentStatusFilter = '';
+let currentUnitFilter = ''; // State untuk Unit Kerja
 let searchQuery = '';
 
 const tbody         = document.getElementById('tbodyAnggota');
 const tfoot         = document.getElementById('tfootAnggota');
 const addBtn        = document.getElementById('addBtn');
 const filterStatus  = document.getElementById('filterStatus');
+const filterUnit    = document.getElementById('filterUnit'); // Elemen Baru
 const searchInput   = document.getElementById('searchAnggota');
 const drawer        = document.getElementById('drawer');
 const drawerOverlay = document.getElementById('drawerOverlay');
 const tableSubtitle = document.getElementById('tableSubtitle');
 
-// ============================================
-// PALET WARNA STATUS (fallback)
-// ============================================
+// Palet warna status
 const STATUS_PALETTE = [
-  ['#34d399', '#059669'], // 0 hijau
-  ['#f87171', '#dc2626'], // 1 merah
+  ['#34d399', '#059669'], // 0 hijau (Aktif)
+  ['#f87171', '#dc2626'], // 1 merah (Tidak Aktif)
   ['#94a3b8', '#64748b'], // 2 abu
   ['#fbbf24', '#f59e0b'], // 3 kuning
   ['#60a5fa', '#2563eb'], // 4 biru
@@ -33,22 +34,14 @@ function colorForStatus(name) {
   if (!s) return STATUS_PALETTE[2];
   if (s.includes('tidak') || s.includes('non') || s.includes('berhenti')) return STATUS_PALETTE[1];
   if (s.includes('pensiun')) return STATUS_PALETTE[2];
-  if (s.includes('mutasi') || s.includes('pindah')) return STATUS_PALETTE[3];
-  if (s.includes('cuti')) return STATUS_PALETTE[4];
-  if (s.includes('baru')) return STATUS_PALETTE[5];
   if (s.includes('aktif')) return STATUS_PALETTE[0];
-
-  // fallback hash
   let h = 0;
   for (let i = 0; i < s.length; i++) h = s.charCodeAt(i) + ((h << 5) - h);
   return STATUS_PALETTE[Math.abs(h) % STATUS_PALETTE.length];
 }
 
 function statusToClass(name) {
-  const slug = String(name || '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+  const slug = String(name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   return 'status-' + (slug || 'default');
 }
 
@@ -74,6 +67,15 @@ function setupAnggotaEvents() {
   if (formAnggota)  formAnggota.addEventListener('submit', handleSubmit);
   if (refreshBtn)   refreshBtn.addEventListener('click', loadAnggota);
 
+  // Event Filter Unit Kerja
+  if (filterUnit) {
+    filterUnit.addEventListener('change', e => {
+      currentUnitFilter = e.target.value;
+      renderAll();
+    });
+  }
+
+  // Event Filter Status (Jabatan/Keterangan)
   if (filterStatus) {
     filterStatus.addEventListener('change', e => {
       currentStatusFilter = e.target.value;
@@ -111,11 +113,12 @@ async function loadAnggota() {
       nama:       String(a.nama || ''),
       npa:        String(a.npa || ''),
       unit_kerja: String(a.unit_kerja || a.unitKerja || a['Unit Kerja'] || ''),
-      status:     String(a.status || 'Aktif').trim() || 'Aktif',
-      keterangan: String(a.keterangan || '')
+      status:     String(a.status || '').trim(),     // Kolom E (Jabatan: PNS/PPPK)
+      keterangan: String(a.keterangan || 'Aktif').trim() // Kolom F (Status: Aktif/Tidak)
     }));
 
-    buildStatusFilter();
+    buildUnitFilter();   // Membangun dropdown unit
+    buildStatusFilter(); // Membangun dropdown status
     renderAll();
     updateHeroStats();
   } catch (err) {
@@ -126,28 +129,68 @@ async function loadAnggota() {
   }
 }
 
+// --- FUNGSI FILTER UNIT KERJA ---
+function buildUnitFilter() {
+  if (!filterUnit) return;
+  const units = new Set();
+  
+  // Kumpulkan semua unit kerja yang unik
+  allAnggota.forEach(a => { 
+    if (a.unit_kerja) units.add(a.unit_kerja.trim()); 
+  });
+
+  const currentVal = filterUnit.value || currentUnitFilter;
+  filterUnit.innerHTML = '<option value="">Semua Unit</option>';
+  
+  // Urutkan unit secara alfabetis
+  Array.from(units).sort().forEach(u => {
+    const opt = document.createElement('option');
+    opt.value = u;
+    opt.textContent = u;
+    filterUnit.appendChild(opt);
+  });
+  
+  filterUnit.value = currentVal;
+  currentUnitFilter = currentVal;
+}
+
+// --- FUNGSI FILTER STATUS ---
 function buildStatusFilter() {
   if (!filterStatus) return;
   const statuses = new Set();
-  allAnggota.forEach(a => { if (a.status) statuses.add(a.status.trim()); });
+  
+  allAnggota.forEach(a => { 
+    if (a.keterangan) statuses.add(a.keterangan); 
+  });
 
   const currentVal = filterStatus.value || currentStatusFilter;
   filterStatus.innerHTML = '<option value="">Semua Status</option>';
+  
   Array.from(statuses).sort().forEach(s => {
     const opt = document.createElement('option');
     opt.value = s;
     opt.textContent = s;
     filterStatus.appendChild(opt);
   });
+  
   filterStatus.value = currentVal;
   currentStatusFilter = currentVal;
 }
 
 function getFilteredData() {
   let data = [...allAnggota];
-  if (currentStatusFilter) {
-    data = data.filter(a => (a.status || '').trim() === currentStatusFilter);
+
+  // 1. Filter berdasarkan Unit Kerja
+  if (currentUnitFilter) {
+    data = data.filter(a => a.unit_kerja === currentUnitFilter);
   }
+
+  // 2. Filter berdasarkan Status Keanggotaan (Aktif/Tidak)
+  if (currentStatusFilter) {
+    data = data.filter(a => a.keterangan === currentStatusFilter);
+  }
+
+  // 3. Filter berdasarkan Pencarian
   if (searchQuery) {
     data = data.filter(a =>
       (a.nama || '').toLowerCase().includes(searchQuery) ||
@@ -155,12 +198,13 @@ function getFilteredData() {
       (a.unit_kerja || '').toLowerCase().includes(searchQuery)
     );
   }
+
   data.sort((a, b) => (a.nama || '').localeCompare(b.nama || ''));
   return data;
 }
 
 // ============================================
-// RENDER
+// RENDER TABEL
 // ============================================
 function renderAll() {
   const data = getFilteredData();
@@ -191,9 +235,9 @@ function renderTable(data) {
   }
 
   tbody.innerHTML = data.map((a, i) => {
-    const statusRaw   = (a.status || 'Aktif').trim() || 'Aktif';
+    const statusRaw   = (a.status || '—').trim();
     const statusClass = statusToClass(statusRaw);
-    const [c1, c2]    = colorForStatus(statusRaw);
+    const [c1, c2]    = colorForStatus(a.keterangan); 
     const badgeStyle  = `background:linear-gradient(135deg,${c1},${c2});color:#fff;`;
 
     const aksi = isAdmin
@@ -216,7 +260,7 @@ function renderTable(data) {
             ${escapeHtml(statusRaw)}
           </span>
         </td>
-        <td style="color:var(--sd-muted);font-size:0.82rem;">${escapeHtml(a.keterangan || '—')}</td>
+        <td style="color:var(--sd-muted);font-size:0.82rem;font-weight:700;">${escapeHtml(a.keterangan || '—')}</td>
         ${aksi}
       </tr>`;
   }).join('');
@@ -229,10 +273,8 @@ function renderTable(data) {
 
 function updateHeroStats() {
   const total = allAnggota.length;
-  const aktif = allAnggota.filter(a => (a.status || '').trim().toLowerCase() === 'aktif').length;
-  const units = new Set(
-    allAnggota.map(a => (a.unit_kerja || '').trim()).filter(Boolean)
-  ).size;
+  const aktif = allAnggota.filter(a => (a.keterangan || '').toLowerCase().includes('aktif')).length;
+  const units = new Set(allAnggota.map(a => (a.unit_kerja || '').trim()).filter(Boolean)).size;
 
   animateNumber(document.getElementById('heroTotalAnggota'), total);
   animateNumber(document.getElementById('heroAktif'), aktif);
@@ -252,7 +294,7 @@ function animateNumber(el, target) {
 }
 
 // ============================================
-// DRAWER
+// DRAWER (FORM)
 // ============================================
 function openDrawer(mode, data = null) {
   if (!isAdmin || !drawer) return;
@@ -268,8 +310,8 @@ function openDrawer(mode, data = null) {
     document.getElementById('inputNama').value       = data.nama || '';
     document.getElementById('inputNpa').value        = data.npa || '';
     document.getElementById('inputUnit').value       = data.unit_kerja || '';
-    document.getElementById('inputStatus').value     = data.status || 'Aktif';
-    document.getElementById('inputKeterangan').value = data.keterangan || '';
+    document.getElementById('inputStatus').value     = data.status || ''; // Jabatan (PNS/PPPK)
+    document.getElementById('inputKeterangan').value = data.keterangan || 'Aktif'; // Status Keanggotaan
     document.getElementById('submitBtn').textContent = 'Update';
   } else {
     title.textContent = 'Tambah Anggota';
@@ -303,8 +345,8 @@ async function handleSubmit(e) {
     nama: document.getElementById('inputNama').value,
     npa: document.getElementById('inputNpa').value,
     unit_kerja: document.getElementById('inputUnit').value,
-    status: document.getElementById('inputStatus').value,
-    keterangan: document.getElementById('inputKeterangan').value
+    status: document.getElementById('inputStatus').value, // PNS, PPPK
+    keterangan: document.getElementById('inputKeterangan').value // Aktif, Tidak Aktif
   };
 
   const btn = document.getElementById('submitBtn');

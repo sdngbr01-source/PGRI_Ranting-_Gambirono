@@ -1,8 +1,7 @@
 // ============================================
-// KONFIG FOTO OTOMATIS
+// pengurus/pengurus.js
 // ============================================
-// Foto diambil dari folder ini berdasarkan urutan data:
-// pengurus1.png, pengurus2.png, pengurus3.png, dst.
+
 const FOTO_FOLDER = './';
 const FOTO_EXT    = '.png';
 
@@ -10,9 +9,6 @@ function fotoKe(index) {
   return `${FOTO_FOLDER}/pengurus${index}${FOTO_EXT}`;
 }
 
-// ============================================
-// STATE
-// ============================================
 let pengurusData = [];
 let filteredData = [];
 let activeFilter = '';
@@ -22,7 +18,6 @@ const addBtn     = document.getElementById('addPengurusBtn');
 const modal      = document.getElementById('pengurusModal');
 const chipFilter = document.getElementById('chipFilter');
 
-// Palet warna kartu
 const PALETTES = [
   ['#4facfe', '#00f2fe'], ['#ff9f43', '#ff6b9d'],
   ['#a78bfa', '#7c3aed'], ['#34d399', '#059669'],
@@ -36,6 +31,24 @@ function paletteFor(name) {
   const s = String(name || '?');
   for (let i = 0; i < s.length; i++) hash = s.charCodeAt(i) + ((hash << 5) - hash);
   return PALETTES[Math.abs(hash) % PALETTES.length];
+}
+
+// --- FUNGSI PENGURUT JABATAN ---
+function getBobotJabatan(jabatan) {
+  const j = String(jabatan).toLowerCase();
+  if (j.includes('ketua') && !j.includes('wakil')) return 1;
+  if (j.includes('wakil')) return 2;
+  if (j.includes('sekretaris')) return 3;
+  if (j.includes('bendahara')) return 4;
+  if (j.includes('kordinator') || j.includes('koordinator')) return 5;
+  return 99;
+}
+
+function sortJabatan(a, b) {
+  const bobotA = getBobotJabatan(a.jabatan);
+  const bobotB = getBobotJabatan(b.jabatan);
+  if (bobotA !== bobotB) return bobotA - bobotB;
+  return String(a.nama).localeCompare(String(b.nama));
 }
 
 // ============================================
@@ -77,7 +90,6 @@ async function loadPengurus() {
     pengurusData = result.data || [];
     buildChips();
     applyFilter();
-    updateHeroStats();
     updateAdminUI();
   } catch (err) {
     grid.innerHTML = `<div class="empty-state-sd" style="color:#b91c1c">⚠️ Gagal memuat: ${escapeHtml(err.message)}</div>`;
@@ -85,17 +97,16 @@ async function loadPengurus() {
 }
 
 // ============================================
-// FILTER CHIP
+// FILTER CHIP & SORT
 // ============================================
 function buildChips() {
   const jabatanSet = new Set();
   pengurusData.forEach(p => { if (p.jabatan) jabatanSet.add(p.jabatan.trim()); });
 
   const current = activeFilter;
-  chipFilter.innerHTML =
-    `<button class="chip ${current === '' ? 'active' : ''}" data-filter="">Semua</button>`;
+  chipFilter.innerHTML = `<button class="chip ${current === '' ? 'active' : ''}" data-filter="">Semua</button>`;
 
-  Array.from(jabatanSet).sort().forEach(j => {
+  Array.from(jabatanSet).sort((a, b) => getBobotJabatan(a) - getBobotJabatan(b)).forEach(j => {
     const b = document.createElement('button');
     b.className = 'chip' + (current === j ? ' active' : '');
     b.dataset.filter = j;
@@ -106,38 +117,12 @@ function buildChips() {
 
 function applyFilter() {
   filteredData = activeFilter
-    ? pengurusData.filter(p =>
-        String(p.jabatan || '').trim().toLowerCase() === activeFilter.toLowerCase())
+    ? pengurusData.filter(p => String(p.jabatan || '').trim().toLowerCase() === activeFilter.toLowerCase())
     : [...pengurusData];
+    
+  // Terapkan pengurutan hierarki
+  filteredData.sort(sortJabatan);
   renderPengurus();
-}
-
-// ============================================
-// HERO STATS
-// ============================================
-function updateHeroStats() {
-  const total   = pengurusData.length;
-  const jabatan = new Set(
-    pengurusData.map(p => String(p.jabatan || '').trim()).filter(Boolean)
-  ).size;
-  const periode = pengurusData.find(p => p.periode)?.periode || '—';
-
-  animateNumber(document.getElementById('heroTotal'),   total);
-  animateNumber(document.getElementById('heroJabatan'), jabatan);
-  const el = document.getElementById('heroPeriode');
-  if (el) el.textContent = periode;
-}
-
-function animateNumber(el, target) {
-  if (!el) return;
-  const dur = 700;
-  const t0  = performance.now();
-  function step(now) {
-    const p = Math.min((now - t0) / dur, 1);
-    el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
-    if (p < 1) requestAnimationFrame(step);
-  }
-  requestAnimationFrame(step);
 }
 
 // ============================================

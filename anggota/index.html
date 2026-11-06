@@ -28,9 +28,10 @@
       <div class="nav-inner">
         <a href="../index.html" class="nav-link">🏠 Dashboard</a>
         <a href="../pengurus/index.html" class="nav-link">👥 Susunan Pengurus</a>
-        <a href="index.html" class="nav-link active">👨‍🏫 Anggota</a>
+        <a href="../anggota/index.html" class="nav-link active">👨‍🏫 Anggota</a>
         <a href="../program/index.html" class="nav-link">📋 Program Kerja</a>
         <a href="../keuangan/index.html" class="nav-link">💰 Laporan Keuangan</a>
+        <a href="../iuran/index.html" class="nav-link">📅 Rekap Iuran</a>
       </div>
     </nav>
   </header>
@@ -42,12 +43,8 @@
       <span class="shape s5"></span>
     </div>
     <div class="hero-inner">
-      <div class="hero-badge">👨‍🏫 Data Anggota</div>
-      <h1 class="hero-title">Anggota <span>PGRI</span></h1>
-      <p class="hero-sub">
-        Daftar anggota PGRI Ranting Gambirono lengkap dengan NPA,
-        unit kerja, dan status keanggotaan 📋
-      </p>
+      <h1 class="hero-title">Data Anggota <p><span>PGRI Ranting Gambirono</span></h1></p>
+      
       <div class="hero-sd-stats">
         <div class="hero-stat">
           <div class="hero-stat-icon">👥</div>
@@ -82,6 +79,12 @@
           <p class="card-sd-sub" id="tableSubtitle">Menampilkan semua anggota</p>
         </div>
         <div class="card-sd-actions">
+<div class="filter-group">
+  <label for="filterUnit">Unit Kerja</label>
+  <select id="filterUnit">
+    <option value="">Semua Unit</option>
+  </select>
+</div>
           <div class="filter-group">
             <label for="filterStatus">Status</label>
             <select id="filterStatus">
@@ -105,7 +108,7 @@
               <th>Nama</th>
               <th>NPA</th>
               <th>Unit Kerja</th>
-              <th>Status</th>
+              <th>Jabatan</th>
               <th>Keterangan</th>
               <th class="admin-only hidden col-aksi text-center">Aksi</th>
             </tr>
@@ -167,33 +170,42 @@
       <h2 id="drawerTitle">Tambah Anggota</h2>
       <button type="button" class="drawer-close" id="drawerClose">✕</button>
     </div>
+    
     <form id="formAnggota" class="drawer-body">
       <input type="hidden" id="inputId" value="">
+      
       <div class="form-group">
         <label for="inputNama">Nama Lengkap</label>
         <input type="text" id="inputNama" placeholder="Nama anggota" required>
       </div>
+      
       <div class="form-group">
         <label for="inputNpa">NPA (Nomor Pokok Anggota)</label>
         <input type="text" id="inputNpa" placeholder="Contoh: 1234567890">
       </div>
+      
       <div class="form-group">
         <label for="inputUnit">Unit Kerja</label>
         <input type="text" id="inputUnit" placeholder="Contoh: SDN Gambirono 1">
       </div>
+      
+      <!-- KOLOM E: Jabatan (PNS, PPPK, dll) -->
       <div class="form-group">
-        <label for="inputStatus">Status</label>
-        <select id="inputStatus">
+        <label for="inputStatus">Jabatan (PNS/PPPK/Non ASN)</label>
+        <input type="text" id="inputStatus" placeholder="Contoh: PNS" required>
+      </div>
+      
+      <!-- KOLOM F: Status Keanggotaan (Aktif / Tidak Aktif) -->
+      <div class="form-group">
+        <label for="inputKeterangan">Status Keanggotaan</label>
+        <select id="inputKeterangan">
           <option value="Aktif">Aktif</option>
           <option value="Tidak Aktif">Tidak Aktif</option>
           <option value="Pensiun">Pensiun</option>
           <option value="Mutasi">Mutasi</option>
         </select>
       </div>
-      <div class="form-group">
-        <label for="inputKeterangan">Keterangan</label>
-        <input type="text" id="inputKeterangan" placeholder="Catatan tambahan (opsional)">
-      </div>
+      
       <div class="drawer-footer">
         <button type="button" class="btn btn-ghost" id="drawerCancel">Batal</button>
         <button type="submit" class="btn btn-primary" id="submitBtn">Simpan</button>
