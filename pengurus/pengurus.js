@@ -156,8 +156,9 @@ function renderPengurus() {
         <div class="pengurus-info">
           <div class="pengurus-nama">${escapeHtml(p.nama)}</div>
           <div class="pengurus-jabatan-badge">${escapeHtml(p.jabatan || 'Anggota')}</div>
-          ${p.periode ? `<div class="pengurus-meta">📅 Periode ${escapeHtml(p.periode)}</div>` : ''}
-          ${p.kontak  ? `<div class="pengurus-meta">📞 ${escapeHtml(p.kontak)}</div>` : ''}
+          ${p.periode       ? `<div class="pengurus-meta">📅 Periode ${escapeHtml(p.periode)}</div>` : ''}
+${p.asal_instansi ? `<div class="pengurus-meta">🏫 ${escapeHtml(p.asal_instansi)}</div>` : ''}
+${p.npa           ? `<div class="pengurus-meta">🆔 NPA ${escapeHtml(p.npa)}</div>` : ''}
         </div>
         <div class="pengurus-actions admin-only ${isAdmin ? '' : 'hidden'}">
           <button class="btn btn-edit" onclick="editPengurus('${escapeAttr(p.id)}')">✏️ Edit</button>
@@ -188,7 +189,8 @@ function openPengurusModal(mode, data = null) {
     document.getElementById('pengurusNama').value    = data.nama;
     document.getElementById('pengurusJabatan').value = data.jabatan;
     document.getElementById('pengurusPeriode').value = data.periode || '';
-    document.getElementById('pengurusKontak').value  = data.kontak  || '';
+   document.getElementById('pengurusAsalInstansi').value = data.asal_instansi || '';
+document.getElementById('pengurusNpa').value          = data.npa || '';
   } else {
     title.textContent = 'Tambah Pengurus';
   }
@@ -198,15 +200,16 @@ function openPengurusModal(mode, data = null) {
 async function handlePengurusSubmit(e) {
   e.preventDefault();
   const id = document.getElementById('pengurusId').value;
-  const payload = {
-    action:  id ? 'updatePengurus' : 'addPengurus',
-    token:   token,
-    id:      id || undefined,
-    nama:    document.getElementById('pengurusNama').value,
-    jabatan: document.getElementById('pengurusJabatan').value,
-    periode: document.getElementById('pengurusPeriode').value,
-    kontak:  document.getElementById('pengurusKontak').value
-  };
+const payload = {
+  action:         id ? 'updatePengurus' : 'addPengurus',
+  token:          token,
+  id:             id || undefined,
+  nama:           document.getElementById('pengurusNama').value,
+  jabatan:        document.getElementById('pengurusJabatan').value,
+  periode:        document.getElementById('pengurusPeriode').value,
+  asal_instansi:  document.getElementById('pengurusAsalInstansi').value,
+  npa:            document.getElementById('pengurusNpa').value
+};
 
   try {
     const res = await fetch(API_URL, {
